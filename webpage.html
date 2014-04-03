@@ -1,0 +1,81 @@
+<HTML>
+<HEAD>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <script src="//localhost:8000/socket.io/socket.io.js"></script>
+    <script  src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script>
+
+        var socket = io.connect('http://localhost:8000');
+
+        socket.on('refresh', function refreshItemList(total) {
+            document.getElementById('itemlist').innerHTML = "";
+        });
+
+        function pushed(id, className){
+            var employee = document.getElementById('employeeName').value;
+            console.log(employee);
+            socket.emit('updateClickArray',{id:id}, employee);
+        }
+
+
+        socket.on('updateList', function (clickArray, id) {
+            console.log(id.id);
+            if (clickArray[id.id] == null) {
+                clickArray[id.id] = 0;
+            }
+            var item = document.getElementById(id.id).innerHTML;
+            document.getElementById('itemlist').innerHTML += '<option value ="' + id.id + '">' + item + '</option>';
+
+        });
+
+        socket.on('updatePrice', function (total) {
+            document.getElementById('total').innerHTML = total.toFixed(2);
+        });
+
+        function del() {
+            console.log('first');
+            $('select option:selected').each(function() {
+                var item = $(this).text();
+                var selected = $(this).val();
+                console.log(item);
+                console.log(selected);
+                socket.emit('deleteItem', selected, item);
+            });
+            document.getElementById('itemlist').innerHTML = "";
+            socket.emit('refreshAll');
+
+        }
+
+        function voidAll() {
+            $('#itemlist option').prop('selected',true);
+            del();
+        }
+
+        function payment(creditType) {
+            var employee = document.getElementById('employeeName').value;
+            console.log(employee);
+            socket.emit('pay', creditType, employee);
+            voidAll();
+        }
+    </script>
+</HEAD>
+<BODY>
+DBBUTTONS
+<label style="position: absolute; left:65%; top:5.5%" for="employeeName"><b>Employee:</b></label>
+<input style="position: absolute; left:70%; top:5%" type="text" id="employeeName" name="User" placeholder="Employee Name">
+<div style="position: absolute; left:70%; top:10%">
+    <select id="itemlist" name="items[]" multiple="multiple" size="20" style="width:200px">
+    </select>
+    <br/>
+    total: $<B ID="total">0</B>
+    <button id="delete" onclick='del()'>Delete</button>
+    <button id="void" onclick="voidAll()" >Void All</button>
+    <br/>
+    <button id="credit" onclick="payment('Credit')">Credit</button>
+    <button id="cash" onclick="payment('Cash')">Cash</button>
+    <button id="check" onclick="payment('Check')">Check</button>
+</div>
+</BODY>
+</HTML>
+
+
