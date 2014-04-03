@@ -32,6 +32,15 @@
             document.getElementById('total').innerHTML = total.toFixed(2);
         });
 
+        socket.on('enterName', function (name) {
+            if(name == null) {
+                document.getElementById('enteredName').innerHTML = 'Please enter your name in the Employee Box';
+            } else {
+                document.getElementById('enteredName').innerHTML = '';
+            }
+
+        });
+
         function del() {
             console.log('first');
             $('select option:selected').each(function() {
@@ -46,16 +55,15 @@
 
         }
 
-        function voidAll() {
+        socket.on('voidAll', function () {
             $('#itemlist option').prop('selected',true);
             del();
-        }
+        });
 
         function payment(creditType) {
             var employee = document.getElementById('employeeName').value;
             console.log(employee);
             socket.emit('pay', creditType, employee);
-            voidAll();
         }
     </script>
 </HEAD>
@@ -71,6 +79,7 @@ DBBUTTONS
     <button id="delete" onclick='del()'>Delete</button>
     <button id="void" onclick="voidAll()" >Void All</button>
     <br/>
+    <p id="enteredName"></p>
     <button id="credit" onclick="payment('Credit')">Credit</button>
     <button id="cash" onclick="payment('Cash')">Cash</button>
     <button id="check" onclick="payment('Check')">Check</button>

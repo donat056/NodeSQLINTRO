@@ -115,9 +115,25 @@ io.listen(8000).on('connection', function (socket) {
     });
 
     socket.on('pay', function (creditType, employee) {
-        var completeQuery = "call COMPLETE_TRANSACTION('" + employee + "','" + creditType + "')";
-        connection.query(completeQuery);
+        var i = 0;
+        var employeeName;
+        var employeeCheckQuery = 'select * from Employee where name = "' + employee + '"';
+        connection.query(employeeCheckQuery, function(err, rows, fields) {
+            if (err) throw err;
+            while (rows[i] != undefined) {
+                employeeName = rows[i].name;
+                i++;
 
+            }
+            if (employeeName == undefined) {
+                socket.emit('enterName', null);
+            } else {
+                var completeQuery = "call COMPLETE_TRANSACTION('" + employee + "','" + creditType + "')";
+                connection.query(completeQuery);
+                socket.emit('enterName', employeeName);
+                socket.emit('voidAll');
+            }
+        });
     });
 
     function checkDeal() {
